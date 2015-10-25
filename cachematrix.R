@@ -1,19 +1,23 @@
 ## Project: Cached Inverse Matrix
 ## Author: rpatal
 ## Date: 20151025
-## Descripction: The following functions allow to cache the inverse of a matrix to reduce the computing cost.
+## Description: The following functions allow to cache the inverse of a matrix to reduce the computing cost.
 
 ## This function create a special object of matrix that allows to set and get the data and its inverse.
 makeCacheMatrix <- function(m = matrix()) {
   i <- NULL
+  ## Set and get the data
   set <- function(y)
   {
     m <<- y
     i <<- NULL
   }
   get <- function() m
+  
+  ## Set and get the inverse
   setInverse <- function(inv) i <<- inv
   getInverse <- function() i
+  
   list(set = set, get = get, setInverse = setInverse, getInverse = getInverse)
 }
 
@@ -28,8 +32,19 @@ cacheSolve <- function(x, ...) {
     message("Getting cached data")
     return(i)
   }
+  ## Calculate inverse of the matrix
   original <- x$get()
-  i <- solve(original)
+  i <- tryCatch(
+    {
+      solve(original)
+    },
+    error = function(err)
+    {
+      ## Warn if the inverse couldn't be calculated.
+      message("It's not possible to calculate the inverse of the matrix.")
+      return(NULL)
+    }
+  )
   x$setInverse(i)
   i
 }
